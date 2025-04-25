@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <h1>IndyFit</h1>
+        <p>Fitness for Indianapolis Parks</p>
+    </header>
+    
+    <nav>
+        <a href="/">Home</a>
+        <a href="/about">About</a>
+        <a href="#">Parks</a>
+        <a href="#">Activities</a>
+        <a href="#">Leaderboard</a>
+    </nav>
+    
+    <div class="container">
+        <div class="card">
+            <h2>Welcome to IndyFit!</h2>
+            <p>A gamified fitness application for Indianapolis Parks, encouraging healthy activities through social engagement and friendly competition.</p>
+            
+            <div class="features">
+                <div class="feature">
+                    <h3>Activity Tracking</h3>
+                    <p>Log workouts performed at Indianapolis park locations</p>
+                </div>
+                <div class="feature">
+                    <h3>Point System</h3>
+                    <p>Earn points based on activity type and duration</p>
+                </div>
+                <div class="feature">
+                    <h3>Leaderboard</h3>
+                    <p>See how you rank against other community members</p>
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 30px;">
+                <a href="#" class="btn">Get Started</a>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <p>&copy; 2025 IndyFit | SDEV 220 - Ivy Tech Community College</p>
+    </footer>
+</body>
+</html>

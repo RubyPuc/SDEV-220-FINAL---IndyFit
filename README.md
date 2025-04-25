@@ -26,7 +26,7 @@ IndyFit is a web application designed to help Indianapolis residents engage with
 
 ### Prerequisites
 
-- Python 3.8+
+- Docker and Docker Compose
 - Git
 
 ### Installation
@@ -37,12 +37,25 @@ git clone https://github.com/RubyPuc/SDEV-220-FINAL---IndyFit.git
 cd SDEV-220-FINAL---IndyFit
 ```
 
-Placeholder
+2. Build and run the Docker containers
+```bash
+docker-compose up --build
+```
+
+3. Access the application
+   - Open your browser and navigate to http://localhost:5000
 
 ## 🗂️ Project Structure
 
 ```
-Placeholder
+IndyFit/
+├── app.py                 # Main Flask application
+├── requirements.txt       # Python dependencies
+├── templates/             # HTML templates
+│   └── index.html         # Homepage template
+├── Dockerfile             # Docker configuration
+├── docker-compose.yml     # Docker Compose configuration
+└── README.md              # Project documentation
 ```
 
 ## 👨‍💻 Team Members
@@ -53,9 +66,13 @@ Placeholder
 
 ## 📝 Development Plan
 
-1. Set up project structure and environment
-2. Implement core structure
-3. Stuff
+1. ✅ Set up project structure and environment
+2. Implement user authentication system
+3. Create database models for users, activities, and parks
+4. Develop activity tracking functionality
+5. Implement point system and leaderboard
+6. Add park information and details
+7. Enhance UI/UX with responsive design
 
 
 ## 📄 License
