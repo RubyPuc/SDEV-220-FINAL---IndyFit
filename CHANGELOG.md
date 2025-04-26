@@ -1,5 +1,44 @@
 # Changelog
 
+## v0.2.2 - Additional Dependency Fix (2025-04-25)
+
+### Fixed
+- Resolved SQLAlchemy compatibility issue
+- Added explicit SQLAlchemy version 1.4.46 to requirements
+
+## v0.2.1 - Dependency Fix (2025-04-25)
+
+### Fixed
+- Resolved dependency conflict between Flask-Login and Werkzeug
+- Pinned package versions to ensure compatibility:
+  - Downgraded Flask to 2.0.1
+  - Specified Werkzeug 2.0.3
+  - Downgraded Flask-Login to 0.5.0
+  - Adjusted Flask-SQLAlchemy to 2.5.1
+
+## v0.2.0 - Admin User Implementation (2025-04-25)
+
+### Added
+- Admin user functionality
+  - Automatic admin user creation on first start
+  - Admin login system with Flask-Login
+  - Admin dashboard template
+  - User authentication and session management
+- New dependencies
+  - Flask-Bcrypt for password hashing
+  - Flask-Login for user session management
+- New templates
+  - login.html for admin authentication
+  - admin_dashboard.html for admin interface
+- Environment variables for admin user configuration
+- Persistent volume for SQLite database in Docker
+
+### Changed
+- Enabled database functionality (previously commented out)
+- Updated User model to include admin role and authentication methods
+- Enhanced docker-compose.yml with environment variables for admin configuration
+- Added admin link to main navigation
+
 ## v0.1.0 - Initial Setup (2025-04-24)
 
 ### Added

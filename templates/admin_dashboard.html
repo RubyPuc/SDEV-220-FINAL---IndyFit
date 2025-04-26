@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            min-height: calc(100vh - 200px);
+        }
+        
+        .sidebar {
+            background-color: #f0f0f0;
+            padding: 20px;
+            border-right: 1px solid #ddd;
+        }
+        
+        .sidebar h3 {
+            margin-top: 0;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .sidebar li {
+            margin-bottom: 10px;
+        }
+        
+        .sidebar a {
+            display: block;
+            padding: 8px 10px;
+            color: var(--text-color);
+            text-decoration: none;
+            border-radius: 4px;
+        }
+        
+        .sidebar a:hover, .sidebar a.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .main-content {
+            padding: 20px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .stat-card h3 {
+            margin-top: 0;
+            color: var(--primary-color);
+        }
+        
+        .stat-card .number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .welcome-message {
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>IndyFit Admin</h1>
+        <p>Administration Dashboard</p>
+    </header>
+    
+    <nav>
+        <a href="/">Home</a>
+        <a href="/admin">Dashboard</a>
+        <a href="/admin/logout">Logout</a>
+    </nav>
+    
+    <div class="container">
+        <div class="dashboard-container">
+            <div class="sidebar">
+                <h3>Admin Menu</h3>
+                <ul>
+                    <li><a href="/admin" class="active">Dashboard</a></li>
+                    <li><a href="/admin/users">Users</a></li>
+                    <li><a href="/admin/parks">Parks</a></li>
+                    <li><a href="/admin/activities">Activities</a></li>
+                    <li><a href="/admin/settings">Settings</a></li>
+                </ul>
+            </div>
+            
+            <div class="main-content">
+                <div class="welcome-message">
+                    <h2>Welcome, {{ current_user.first_name }}!</h2>
+                    <p>This is your administration dashboard where you can manage the IndyFit application.</p>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Total Users</h3>
+                        <div class="number">{{ stats.user_count }}</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <h3>Activities</h3>
+                        <div class="number">{{ stats.activity_count }}</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <h3>Parks</h3>
+                        <div class="number">{{ stats.park_count }}</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <h3>Total Points</h3>
+                        <div class="number">{{ stats.total_points }}</div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h3>Recent Activity</h3>
+                    <p>This section will display recent user activities and system events.</p>
+                    
+                    {% if recent_activities %}
+                        <ul>
+                            {% for activity in recent_activities %}
+                                <li>{{ activity.description }} - {{ activity.timestamp }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p>No recent activities to display.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <p>&copy; 2025 IndyFit | SDEV 220 - Ivy Tech Community College</p>
+    </footer>
+</body>
+</html>

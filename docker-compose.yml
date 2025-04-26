@@ -7,9 +7,19 @@ services:
       - "5000:5000"
     volumes:
       - .:/app
+      - indyfit_data:/app/instance
     environment:
       - FLASK_ENV=development
       - FLASK_DEBUG=1
+      # Admin user configuration
+      - ADMIN_USERNAME=admin
+      - ADMIN_EMAIL=admin@indyfit.com
+      - ADMIN_PASSWORD=changeme123  # Change this in production!
+      - ADMIN_FIRST_NAME=Admin
+      - ADMIN_LAST_NAME=User
+      # Database configuration
+      - DATABASE_URL=sqlite:///instance/indyfit.db
+      - SECRET_KEY=dev_key_for_development  # Change this in production!
     restart: unless-stopped
 
   # Database service can be added here in the future
@@ -22,5 +32,6 @@ services:
   #     - POSTGRES_USER=indyfit
   #     - POSTGRES_DB=indyfit
 
-# volumes:
-#   postgres_data:
+volumes:
+  indyfit_data:  # Persistent volume for SQLite database
+  # postgres_data:

@@ -17,9 +17,10 @@ IndyFit is a web application designed to help Indianapolis residents engage with
 ## 🛠️ Technology Stack
 
 - Python (Backend)
-- Web Framework (TBD)
-- Database (TBD)
+- Flask (Web Framework)
+- SQLite/SQLAlchemy (Database)
 - HTML/CSS/JavaScript (Frontend)
+- Docker & Docker Compose (Containerization)
 - GitHub for version control
 
 ## 🚀 Getting Started
@@ -44,6 +45,10 @@ docker-compose up --build
 
 3. Access the application
    - Open your browser and navigate to http://localhost:5000
+   - Admin login is available at http://localhost:5000/admin/login
+   - Default admin credentials:
+     - Username: admin
+     - Password: changeme123 (change this in production!)
 
 ## 🗂️ Project Structure
 
@@ -51,10 +56,19 @@ docker-compose up --build
 IndyFit/
 ├── app.py                 # Main Flask application
 ├── requirements.txt       # Python dependencies
+├── models/                # Database models
+│   ├── __init__.py        # Package initialization
+│   └── user.py            # User model with admin functionality
 ├── templates/             # HTML templates
-│   └── index.html         # Homepage template
+│   ├── index.html         # Homepage template
+│   ├── login.html         # Admin login page
+│   └── admin_dashboard.html # Admin dashboard
+├── static/                # Static files
+│   └── style.css          # Main stylesheet
 ├── Dockerfile             # Docker configuration
 ├── docker-compose.yml     # Docker Compose configuration
+├── CHANGELOG.md           # Detailed change history
+├── SUMMARY.md             # Project summary
 └── README.md              # Project documentation
 ```
 
@@ -67,12 +81,13 @@ IndyFit/
 ## 📝 Development Plan
 
 1. ✅ Set up project structure and environment
-2. Implement user authentication system
-3. Create database models for users, activities, and parks
-4. Develop activity tracking functionality
-5. Implement point system and leaderboard
-6. Add park information and details
-7. Enhance UI/UX with responsive design
+2. ✅ Implement admin user creation and authentication
+3. Implement regular user registration and authentication
+4. Create database models for activities and parks
+5. Develop activity tracking functionality
+6. Implement point system and leaderboard
+7. Add park information and details
+8. Enhance UI/UX with responsive design
 
 
 ## 📄 License
