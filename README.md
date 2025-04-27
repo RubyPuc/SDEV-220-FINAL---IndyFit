@@ -18,7 +18,7 @@ IndyFit is a web application designed to help Indianapolis residents engage with
 
 - Python (Backend)
 - Flask (Web Framework)
-- SQLite/SQLAlchemy (Database)
+- PostgreSQL/SQLAlchemy (Database)
 - HTML/CSS/JavaScript (Frontend)
 - Docker & Docker Compose (Containerization)
 - GitHub for version control
@@ -72,12 +72,23 @@ IndyFit/
 ├── static/                # Static files
 │   └── style.css          # Main stylesheet
 ├── Dockerfile             # Docker configuration
-├── docker-compose.yml     # Docker Compose configuration
+├── docker-compose.yml     # Docker Compose configuration with PostgreSQL
 ├── CHANGELOG.md           # Detailed change history
 └── README.md              # Project documentation
 ```
 
-## 👨‍💻 Team Members
+## 📊 Database
+
+The application uses PostgreSQL for data persistence:
+
+- **PostgreSQL**: Primary database for storing user data, activities, and park information
+- **SQLAlchemy**: ORM for database interactions
+- **Persistent Storage**: Docker volume for database data persistence
+- **Connection Pooling**: Configured for optimal performance and reliability
+
+Database tables are automatically created on first startup, and an admin user is created if none exists.
+
+## ‍💻 Team Members
 
 - Paul Sommers
 - Roberth Pucajuria

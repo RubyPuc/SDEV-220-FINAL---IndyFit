@@ -11,6 +11,10 @@ app = Flask(__name__, static_folder='static')
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev_key_for_development')
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///indyfit.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+    'pool_pre_ping': True,  # Verify connections before using them
+    'pool_recycle': 300,    # Recycle connections every 5 minutes
+}
 
 # Admin user configuration from environment variables
 ADMIN_USERNAME = os.environ.get('ADMIN_USERNAME', 'admin')
@@ -215,9 +219,25 @@ def admin_dashboard():
                           stats=stats,
                           recent_activities=[])  # Placeholder for future implementation
 
-if __name__ == '__main__':
+def init_db():
+    """Initialize the database and create tables"""
     with app.app_context():
-        db.create_all()  # Create database tables
-        create_admin_if_not_exists()  # Create admin user if needed
+        try:
+            db.create_all()  # Create database tables
+            print("Database tables created successfully")
+            create_admin_if_not_exists()  # Create admin user if needed
+        except Exception as e:
+            print(f"Error initializing database: {str(e)}")
+            # If there's an error, wait and retry (useful for container startup timing)
+            import time
+            time.sleep(5)
+            print("Retrying database initialization...")
+            db.create_all()
+            create_admin_if_not_exists()
+
+if __name__ == '__main__':
+    # Initialize database with retry logic for container startup
+    init_db()
     
+    # Run the application
     app.run(host='0.0.0.0', port=5000, debug=True)

@@ -7,7 +7,6 @@ services:
       - "5000:5000"
     volumes:
       - .:/app
-      - indyfit_data:/app/instance
     environment:
       - FLASK_ENV=development
       - FLASK_DEBUG=1
@@ -18,20 +17,23 @@ services:
       - ADMIN_FIRST_NAME=Admin
       - ADMIN_LAST_NAME=User
       # Database configuration
-      - DATABASE_URL=sqlite:///instance/indyfit.db
+      - DATABASE_URL=postgresql://indyfit:indyfit_password@db:5432/indyfit
       - SECRET_KEY=dev_key_for_development  # Change this in production!
+    depends_on:
+      - db
     restart: unless-stopped
 
-  # Database service can be added here in the future
-  # db:
-  #   image: postgres:13
-  #   volumes:
-  #     - postgres_data:/var/lib/postgresql/data
-  #   environment:
-  #     - POSTGRES_PASSWORD=password
-  #     - POSTGRES_USER=indyfit
-  #     - POSTGRES_DB=indyfit
+  db:
+    image: postgres:13
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=indyfit_password
+      - POSTGRES_USER=indyfit
+      - POSTGRES_DB=indyfit
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
 
 volumes:
-  indyfit_data:  # Persistent volume for SQLite database
-  # postgres_data:
+  postgres_data:  # Persistent volume for PostgreSQL database
