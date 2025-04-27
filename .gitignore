@@ -38,6 +38,9 @@ ENV/
 logs/
 *.log
 
+# Project specific
+project_notes/
+
 # OS specific
 .DS_Store
 Thumbs.db

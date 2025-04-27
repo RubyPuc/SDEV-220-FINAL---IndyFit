@@ -12,11 +12,6 @@
   - Implemented retry logic for database initialization
   - Added connection validation with pool_pre_ping
 
-### Changed
-- Updated database connection string to use PostgreSQL
-- Enhanced database initialization with error handling
-- Improved container startup sequence with depends_on
-
 ## v0.3.0 - User Registration Implementation (2025-04-27)
 
 ### Added
