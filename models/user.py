@@ -75,3 +75,37 @@ class User(db.Model, UserMixin):
     def find_by_username(cls, username):
         """Find user by username"""
         return cls.query.filter_by(username=username).first()
+    
+    @classmethod
+    def find_by_email(cls, email):
+        """Find user by email"""
+        return cls.query.filter_by(email=email).first()
+    
+    @classmethod
+    def create_user(cls, username, email, password, first_name, last_name):
+        """Create a regular user"""
+        user = cls(
+            username=username,
+            email=email,
+            first_name=first_name,
+            last_name=last_name,
+            is_admin=False,
+            points=0
+        )
+        user.set_password(password)
+        db.session.add(user)
+        db.session.commit()
+        return user
+    
+    @classmethod
+    def get_user_ranking(cls, user_id):
+        """Get user ranking based on points"""
+        # Get all users ordered by points in descending order
+        users = cls.query.order_by(cls.points.desc()).all()
+        
+        # Find the position of the user in the list
+        for i, user in enumerate(users):
+            if user.id == user_id:
+                return i + 1  # +1 because ranking starts at 1, not 0
+        
+        return len(users)  # If user not found, return last position

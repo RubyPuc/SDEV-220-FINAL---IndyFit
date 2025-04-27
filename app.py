@@ -26,7 +26,7 @@ bcrypt.init_app(app)
 # Initialize Flask-Login
 login_manager = LoginManager()
 login_manager.init_app(app)
-login_manager.login_view = 'admin_login'
+login_manager.login_view = 'login'  # Changed default login view to user login
 login_manager.login_message = 'Please log in to access this page.'
 login_manager.login_message_category = 'danger'
 
@@ -71,11 +71,104 @@ def home():
 def about():
     return render_template('index.html', title='About IndyFit')
 
+# User authentication routes
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    """User registration route"""
+    # Redirect if already logged in
+    if current_user.is_authenticated:
+        return redirect(url_for('profile'))
+    
+    if request.method == 'POST':
+        username = request.form.get('username')
+        email = request.form.get('email')
+        password = request.form.get('password')
+        confirm_password = request.form.get('confirm_password')
+        first_name = request.form.get('first_name')
+        last_name = request.form.get('last_name')
+        
+        # Validate form data
+        if password != confirm_password:
+            flash('Passwords do not match.', 'danger')
+            return render_template('register.html', title='Register')
+        
+        # Check if username or email already exists
+        if User.find_by_username(username):
+            flash('Username already exists. Please choose a different one.', 'danger')
+            return render_template('register.html', title='Register')
+        
+        if User.find_by_email(email):
+            flash('Email already registered. Please use a different email.', 'danger')
+            return render_template('register.html', title='Register')
+        
+        # Create new user
+        try:
+            user = User.create_user(
+                username=username,
+                email=email,
+                password=password,
+                first_name=first_name,
+                last_name=last_name
+            )
+            flash('Registration successful! You can now log in.', 'success')
+            return redirect(url_for('login'))
+        except Exception as e:
+            flash(f'An error occurred during registration: {str(e)}', 'danger')
+    
+    return render_template('register.html', title='Register')
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    """User login route"""
+    # Redirect if already logged in
+    if current_user.is_authenticated:
+        return redirect(url_for('profile'))
+    
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        
+        user = User.find_by_username(username)
+        
+        if user and user.check_password(password):
+            login_user(user)
+            flash('Login successful!', 'success')
+            next_page = request.args.get('next')
+            return redirect(next_page or url_for('profile'))
+        else:
+            flash('Login failed. Please check your username and password.', 'danger')
+    
+    return render_template('user_login.html', title='Login')
+
+@app.route('/profile')
+@login_required
+def profile():
+    """User profile route"""
+    # Mock data for activities
+    activities_count = 0
+    ranking = User.get_user_ranking(current_user.id)
+    recent_activities = []  # This would be populated from a database in a real implementation
+    
+    return render_template('profile.html',
+                          title='My Profile',
+                          current_user=current_user,
+                          activities_count=activities_count,
+                          ranking=ranking,
+                          recent_activities=recent_activities)
+
+@app.route('/logout')
+@login_required
+def logout():
+    """User logout route"""
+    logout_user()
+    flash('You have been logged out.', 'success')
+    return redirect(url_for('home'))
+
 # Admin routes
 @app.route('/admin/login', methods=['GET', 'POST'])
 def admin_login():
     """Admin login route"""
-    # Redirect if already logged in
+    # Redirect if already logged in as admin
     if current_user.is_authenticated and current_user.is_admin:
         return redirect(url_for('admin_dashboard'))
     
@@ -87,11 +180,11 @@ def admin_login():
         
         if user and user.check_password(password) and user.is_admin:
             login_user(user)
-            flash('Login successful!', 'success')
+            flash('Admin login successful!', 'success')
             next_page = request.args.get('next')
             return redirect(next_page or url_for('admin_dashboard'))
         else:
-            flash('Login failed. Please check your username and password.', 'danger')
+            flash('Admin login failed. Please check your credentials.', 'danger')
     
     return render_template('login.html', title='Admin Login')
 

@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .profile-container {
+            max-width: 800px;
+            margin: 30px auto;
+        }
+        
+        .profile-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            margin-right: 20px;
+        }
+        
+        .profile-info h2 {
+            margin: 0 0 10px 0;
+        }
+        
+        .profile-info p {
+            margin: 0;
+            color: var(--secondary-color);
+        }
+        
+        .profile-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .stat-card h3 {
+            margin-top: 0;
+            color: var(--primary-color);
+        }
+        
+        .stat-card .number {
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .recent-activities {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .recent-activities h3 {
+            margin-top: 0;
+            color: var(--primary-color);
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        
+        .activity-item {
+            padding: 15px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+        
+        .activity-date {
+            color: var(--secondary-color);
+            font-size: 0.9rem;
+        }
+        
+        .activity-details {
+            margin-top: 5px;
+        }
+        
+        .activity-points {
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        
+        .no-activities {
+            text-align: center;
+            padding: 20px;
+            color: var(--secondary-color);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>IndyFit</h1>
+        <p>Fitness for Indianapolis Parks</p>
+    </header>
+    
+    <nav>
+        <a href="/">Home</a>
+        <a href="/about">About</a>
+        <a href="#">Parks</a>
+        <a href="#">Activities</a>
+        <a href="#">Leaderboard</a>
+        <a href="/profile" style="margin-left: auto;" class="active">My Profile</a>
+        <a href="/logout">Logout</a>
+    </nav>
+    
+    <div class="container">
+        <div class="profile-container">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            
+            <div class="profile-header">
+                <div class="profile-avatar">
+                    {{ current_user.first_name[0] }}{{ current_user.last_name[0] }}
+                </div>
+                <div class="profile-info">
+                    <h2>{{ current_user.first_name }} {{ current_user.last_name }}</h2>
+                    <p>@{{ current_user.username }}</p>
+                    <p>{{ current_user.email }}</p>
+                </div>
+            </div>
+            
+            <div class="profile-stats">
+                <div class="stat-card">
+                    <h3>Total Points</h3>
+                    <div class="number">{{ current_user.points }}</div>
+                </div>
+                
+                <div class="stat-card">
+                    <h3>Activities</h3>
+                    <div class="number">{{ activities_count }}</div>
+                </div>
+                
+                <div class="stat-card">
+                    <h3>Ranking</h3>
+                    <div class="number">{{ ranking }}</div>
+                </div>
+            </div>
+            
+            <div class="recent-activities">
+                <h3>Recent Activities</h3>
+                
+                {% if recent_activities %}
+                    {% for activity in recent_activities %}
+                        <div class="activity-item">
+                            <div class="activity-date">{{ activity.date }}</div>
+                            <div class="activity-details">
+                                {{ activity.description }} at {{ activity.park }}
+                                <span class="activity-points">+{{ activity.points }} points</span>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="no-activities">
+                        <p>You haven't logged any activities yet.</p>
+                        <a href="#" class="btn">Log an Activity</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <p>&copy; 2025 IndyFit | SDEV 220 - Ivy Tech Community College</p>
+    </footer>
+</body>
+</html>

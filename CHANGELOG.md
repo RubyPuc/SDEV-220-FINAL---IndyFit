@@ -1,5 +1,28 @@
 # Changelog
 
+## v0.3.0 - User Registration Implementation (2025-04-27)
+
+### Added
+- User registration functionality
+  - Registration form with validation
+  - User login system
+  - User profile page
+  - User ranking system
+- New templates
+  - register.html for user registration
+  - user_login.html for user authentication
+  - profile.html for user profile display
+- New User model methods
+  - create_user for regular user creation
+  - find_by_email for email validation
+  - get_user_ranking for leaderboard position
+
+### Changed
+- Updated navigation to include user login/register links
+- Changed default login_view to user login instead of admin login
+- Updated index page "Get Started" button to link to registration
+- Enhanced User model with additional helper methods
+
 ## v0.2.2 - Additional Dependency Fix (2025-04-25)
 
 ### Fixed

@@ -45,6 +45,9 @@ docker-compose up --build
 
 3. Access the application
    - Open your browser and navigate to http://localhost:5000
+   - Register a new user account at http://localhost:5000/register
+   - Login as a user at http://localhost:5000/login
+   - View your profile at http://localhost:5000/profile
    - Admin login is available at http://localhost:5000/admin/login
    - Default admin credentials:
      - Username: admin
@@ -61,6 +64,9 @@ IndyFit/
 │   └── user.py            # User model with admin functionality
 ├── templates/             # HTML templates
 │   ├── index.html         # Homepage template
+│   ├── register.html      # User registration page
+│   ├── user_login.html    # User login page
+│   ├── profile.html       # User profile page
 │   ├── login.html         # Admin login page
 │   └── admin_dashboard.html # Admin dashboard
 ├── static/                # Static files
@@ -68,7 +74,6 @@ IndyFit/
 ├── Dockerfile             # Docker configuration
 ├── docker-compose.yml     # Docker Compose configuration
 ├── CHANGELOG.md           # Detailed change history
-├── SUMMARY.md             # Project summary
 └── README.md              # Project documentation
 ```
 
@@ -82,7 +87,7 @@ IndyFit/
 
 1. ✅ Set up project structure and environment
 2. ✅ Implement admin user creation and authentication
-3. Implement regular user registration and authentication
+3. ✅ Implement regular user registration and authentication
 4. Create database models for activities and parks
 5. Develop activity tracking functionality
 6. Implement point system and leaderboard
