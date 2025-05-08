@@ -1,5 +1,30 @@
 # Changelog
 
+## v0.4.0 - Activity Tracking Implementation (2025-05-07)
+
+### Added
+- Database models for activities and parks
+  - Park model for storing park information
+  - ActivityType model for categorizing activities
+  - UserActivity model for tracking user activities
+- Activity tracking functionality
+  - Form for logging activities at parks
+  - Points calculation based on activity type and duration
+  - User activity history on profile page
+- Park information features
+  - Parks listing page with search functionality
+  - Detailed park view with facilities and recent activities
+- Leaderboard system
+  - User rankings based on points
+  - Activity breakdown statistics
+  - Top users display
+
+### Changed
+- Updated profile page to show real activity data
+- Enhanced navigation with links to new features
+- Updated home page with feature links
+- Improved admin dashboard with real statistics
+
 ## v0.3.1 - PostgreSQL Database Implementation (2025-04-27)
 
 ### Added

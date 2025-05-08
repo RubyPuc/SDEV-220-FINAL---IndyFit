@@ -154,7 +154,7 @@
                 
                 <div class="stat-card">
                     <h3>Activities</h3>
-                    <div class="number">{{ activities_count }}</div>
+                    <div class="number">{{ activity_stats.total_activities }}</div>
                 </div>
                 
                 <div class="stat-card">
@@ -163,23 +163,38 @@
                 </div>
             </div>
             
+            {% if activity_stats.activity_breakdown %}
+                <div class="card" style="margin-bottom: 30px;">
+                    <h3>Activity Breakdown</h3>
+                    <div style="display: flex; flex-wrap: wrap; gap: 15px; margin-top: 20px;">
+                        {% for activity in activity_stats.activity_breakdown %}
+                            <div style="background-color: #e0f4f6; border-radius: 8px; padding: 15px; text-align: center; min-width: 120px;">
+                                <h4 style="margin-top: 0; color: var(--primary-color);">{{ activity.name }}</h4>
+                                <p style="margin-bottom: 5px;"><strong>{{ activity.count }}</strong> activities</p>
+                                <p><strong>{{ activity.minutes }}</strong> minutes</p>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+            
             <div class="recent-activities">
                 <h3>Recent Activities</h3>
                 
                 {% if recent_activities %}
                     {% for activity in recent_activities %}
                         <div class="activity-item">
-                            <div class="activity-date">{{ activity.date }}</div>
+                            <div class="activity-date">{{ activity.date.strftime('%Y-%m-%d') }}</div>
                             <div class="activity-details">
-                                {{ activity.description }} at {{ activity.park }}
-                                <span class="activity-points">+{{ activity.points }} points</span>
+                                {{ activity.activity_type.name }} for {{ activity.duration_minutes }} minutes at {{ activity.park.name }}
+                                <span class="activity-points">+{{ activity.points_earned }} points</span>
                             </div>
                         </div>
                     {% endfor %}
                 {% else %}
                     <div class="no-activities">
                         <p>You haven't logged any activities yet.</p>
-                        <a href="#" class="btn">Log an Activity</a>
+                        <a href="{{ url_for('activities') }}" class="btn">Log an Activity</a>
                     </div>
                 {% endif %}
             </div>

@@ -24,6 +24,12 @@ class User(db.Model, UserMixin):
     def __repr__(self):
         return f'<User {self.username}>'
     
+    def add_points(self, points):
+        """Add points to user's total"""
+        self.points += points
+        db.session.commit()
+        return self.points
+    
     def set_password(self, password):
         """Hash password before storing in database"""
         self.password_hash = bcrypt.generate_password_hash(password).decode('utf-8')
@@ -109,3 +115,50 @@ class User(db.Model, UserMixin):
                 return i + 1  # +1 because ranking starts at 1, not 0
         
         return len(users)  # If user not found, return last position
+    
+    @classmethod
+    def get_leaderboard(cls, limit=10):
+        """Get top users for leaderboard"""
+        return cls.query.order_by(cls.points.desc()).limit(limit).all()
+    
+    def get_recent_activities(self, limit=5):
+        """Get user's recent activities"""
+        from models.activity import UserActivity
+        return UserActivity.get_user_activities(self.id, limit)
+    
+    def get_total_activity_minutes(self):
+        """Get total minutes of activities"""
+        from models.activity import UserActivity
+        result = db.session.query(db.func.sum(UserActivity.duration_minutes)) \
+            .filter(UserActivity.user_id == self.id) \
+            .scalar()
+        return result or 0
+    
+    def get_activity_stats(self):
+        """Get statistics about user activities"""
+        from models.activity import UserActivity, ActivityType
+        
+        # Get total activities
+        total_activities = UserActivity.query.filter_by(user_id=self.id).count()
+        
+        # Get total minutes
+        total_minutes = self.get_total_activity_minutes()
+        
+        # Get activity breakdown by type
+        activity_breakdown = db.session.query(
+            ActivityType.name,
+            db.func.sum(UserActivity.duration_minutes).label('total_minutes'),
+            db.func.count(UserActivity.id).label('count')
+        ).join(UserActivity, UserActivity.activity_type_id == ActivityType.id) \
+         .filter(UserActivity.user_id == self.id) \
+         .group_by(ActivityType.name) \
+         .all()
+        
+        return {
+            'total_activities': total_activities,
+            'total_minutes': total_minutes,
+            'activity_breakdown': [
+                {'name': name, 'minutes': minutes, 'count': count}
+                for name, minutes, count in activity_breakdown
+            ]
+        }

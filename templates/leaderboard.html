@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        .leaderboard-container {
+            max-width: 800px;
+            margin: 30px auto;
+        }
+        
+        .leaderboard-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .leaderboard-header h2 {
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+        
+        .leaderboard-header p {
+            color: var(--secondary-color);
+        }
+        
+        .leaderboard-table {
+            width: 100%;
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .leaderboard-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .leaderboard-table th {
+            background-color: var(--primary-color);
+            color: white;
+            text-align: left;
+            padding: 15px;
+        }
+        
+        .leaderboard-table td {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .leaderboard-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .leaderboard-table tr:hover {
+            background-color: #f9f9f9;
+        }
+        
+        .rank {
+            font-weight: bold;
+            text-align: center;
+            width: 60px;
+        }
+        
+        .rank-1, .rank-2, .rank-3 {
+            font-size: 1.2rem;
+        }
+        
+        .rank-1 {
+            color: gold;
+        }
+        
+        .rank-2 {
+            color: silver;
+        }
+        
+        .rank-3 {
+            color: #cd7f32; /* bronze */
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+        
+        .points {
+            font-weight: bold;
+            color: var(--primary-color);
+            text-align: right;
+        }
+        
+        .current-user-row {
+            background-color: #e0f4f6 !important;
+            font-weight: bold;
+        }
+        
+        .leaderboard-info {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .leaderboard-info h3 {
+            margin-top: 0;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+        
+        .leaderboard-info p {
+            margin-bottom: 10px;
+        }
+        
+        .leaderboard-info ul {
+            margin-top: 10px;
+            padding-left: 20px;
+        }
+        
+        .leaderboard-info li {
+            margin-bottom: 5px;
+        }
+        
+        .activity-types {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .activity-type {
+            background-color: #e0f4f6;
+            color: var(--primary-color);
+            padding: 8px 12px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .activity-type i {
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>IndyFit</h1>
+        <p>Fitness for Indianapolis Parks</p>
+    </header>
+    
+    <nav>
+        <a href="/">Home</a>
+        <a href="/parks">Parks</a>
+        <a href="/activities">Log Activity</a>
+        <a href="/leaderboard" class="active">Leaderboard</a>
+        {% if current_user.is_authenticated %}
+            <a href="/profile" style="margin-left: auto;">My Profile</a>
+            <a href="/logout">Logout</a>
+        {% else %}
+            <a href="/login" style="margin-left: auto;">Login</a>
+            <a href="/register">Register</a>
+        {% endif %}
+    </nav>
+    
+    <div class="container">
+        <div class="leaderboard-container">
+            <div class="leaderboard-header">
+                <h2>IndyFit Leaderboard</h2>
+                <p>Top users ranked by points earned from activities</p>
+            </div>
+            
+            <div class="leaderboard-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>User</th>
+                            <th class="points">Points</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in top_users %}
+                            <tr {% if current_user.is_authenticated and current_user.id == user.id %}class="current-user-row"{% endif %}>
+                                <td class="rank rank-{{ loop.index }}">{{ loop.index }}</td>
+                                <td>
+                                    <div class="user-info">
+                                        <div class="user-avatar">
+                                            {{ user.first_name[0] }}{{ user.last_name[0] }}
+                                        </div>
+                                        <div>
+                                            {{ user.first_name }} {{ user.last_name }}
+                                            {% if user.is_admin %}
+                                                <span style="color: var(--primary-color); font-size: 0.8rem;">(Admin)</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="points">{{ user.points }}</td>
+                            </tr>
+                        {% endfor %}
+                        
+                        {% if top_users|length == 0 %}
+                            <tr>
+                                <td colspan="3" style="text-align: center; padding: 30px;">
+                                    No users have earned points yet. Start logging activities to appear on the leaderboard!
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="leaderboard-info">
+                <h3>How to Earn Points</h3>
+                <p>Points are earned by logging fitness activities at Indianapolis parks. Different activities earn different points per minute:</p>
+                
+                <div class="activity-types">
+                    <div class="activity-type">
+                        <i class="fas fa-walking"></i> Walking: 1 point/min
+                    </div>
+                    <div class="activity-type">
+                        <i class="fas fa-running"></i> Running: 2 points/min
+                    </div>
+                    <div class="activity-type">
+                        <i class="fas fa-bicycle"></i> Cycling: 2 points/min
+                    </div>
+                    <div class="activity-type">
+                        <i class="fas fa-hiking"></i> Hiking: 3 points/min
+                    </div>
+                    <div class="activity-type">
+                        <i class="fas fa-swimmer"></i> Swimming: 3 points/min
+                    </div>
+                </div>
+                
+                <h3 style="margin-top: 20px;">Leaderboard Rules</h3>
+                <ul>
+                    <li>Leaderboard rankings are updated in real-time as activities are logged</li>
+                    <li>Only activities performed at Indianapolis parks count toward points</li>
+                    <li>The leaderboard resets at the beginning of each month</li>
+                    <li>Monthly winners may receive special badges on their profiles</li>
+                </ul>
+                
+                {% if not current_user.is_authenticated %}
+                    <p style="margin-top: 20px; text-align: center;">
+                        <a href="{{ url_for('register') }}" class="btn">Register Now to Start Earning Points</a>
+                    </p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <p>&copy; 2025 IndyFit | SDEV 220 - Ivy Tech Community College</p>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        .park-detail-container {
+            max-width: 1000px;
+            margin: 30px auto;
+        }
+        
+        .park-header {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 30px;
+            gap: 30px;
+        }
+        
+        .park-image {
+            width: 400px;
+            height: 300px;
+            background-color: #e0f4f6;
+            background-size: cover;
+            background-position: center;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            flex-shrink: 0;
+        }
+        
+        .park-image.no-image {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .park-image.no-image i {
+            font-size: 64px;
+            color: var(--primary-color);
+        }
+        
+        .park-info {
+            flex: 1;
+        }
+        
+        .park-info h2 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+        }
+        
+        .park-info .address {
+            font-size: 1rem;
+            margin-bottom: 20px;
+            color: var(--secondary-color);
+        }
+        
+        .park-description {
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        
+        .park-facilities {
+            margin-bottom: 20px;
+        }
+        
+        .park-facilities h3 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+            color: var(--primary-color);
+        }
+        
+        .facilities-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .facility-tag {
+            background-color: #e0f4f6;
+            color: var(--primary-color);
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+        
+        .park-actions {
+            margin-top: 20px;
+        }
+        
+        .btn-log-activity {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        .park-map {
+            height: 400px;
+            background-color: #e0f4f6;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-color);
+            font-size: 1.2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .recent-activities {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .recent-activities h3 {
+            margin-top: 0;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        
+        .activity-item {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+        }
+        
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+        
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            background-color: #e0f4f6;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            color: var(--primary-color);
+        }
+        
+        .activity-details {
+            flex: 1;
+        }
+        
+        .activity-details .user {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .activity-details .info {
+            color: var(--secondary-color);
+            font-size: 0.9rem;
+        }
+        
+        .activity-points {
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-left: 15px;
+        }
+        
+        @media (max-width: 768px) {
+            .park-header {
+                flex-direction: column;
+            }
+            
+            .park-image {
+                width: 100%;
+                height: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>IndyFit</h1>
+        <p>Fitness for Indianapolis Parks</p>
+    </header>
+    
+    <nav>
+        <a href="/">Home</a>
+        <a href="/parks" class="active">Parks</a>
+        <a href="/activities">Log Activity</a>
+        <a href="/leaderboard">Leaderboard</a>
+        {% if current_user.is_authenticated %}
+            <a href="/profile" style="margin-left: auto;">My Profile</a>
+            <a href="/logout">Logout</a>
+        {% else %}
+            <a href="/login" style="margin-left: auto;">Login</a>
+            <a href="/register">Register</a>
+        {% endif %}
+    </nav>
+    
+    <div class="container">
+        <div class="park-detail-container">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            
+            <div class="park-header">
+                {% if park.image_url %}
+                    <div class="park-image" style="background-image: url('{{ park.image_url }}')"></div>
+                {% else %}
+                    <div class="park-image no-image">
+                        <i class="fas fa-tree"></i>
+                    </div>
+                {% endif %}
+                
+                <div class="park-info">
+                    <h2>{{ park.name }}</h2>
+                    <p class="address"><i class="fas fa-map-marker-alt"></i> {{ park.address }}</p>
+                    
+                    {% if park.description %}
+                        <div class="park-description">
+                            {{ park.description }}
+                        </div>
+                    {% endif %}
+                    
+                    {% if park.facilities %}
+                        <div class="park-facilities">
+                            <h3>Facilities</h3>
+                            <div class="facilities-list">
+                                {% for facility in park.get_facility_list() %}
+                                    <span class="facility-tag">{{ facility }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endif %}
+                    
+                    <div class="park-actions">
+                        {% if current_user.is_authenticated %}
+                            <a href="{{ url_for('activities', park_id=park.id) }}" class="btn-log-activity">
+                                <i class="fas fa-plus-circle"></i> Log Activity at this Park
+                            </a>
+                        {% else %}
+                            <a href="{{ url_for('login', next=url_for('activities', park_id=park.id)) }}" class="btn-log-activity">
+                                <i class="fas fa-sign-in-alt"></i> Login to Log Activity
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            {% if park.latitude and park.longitude %}
+                <div class="park-map">
+                    <p>Map would be displayed here with coordinates: {{ park.latitude }}, {{ park.longitude }}</p>
+                </div>
+            {% endif %}
+            
+            <div class="recent-activities">
+                <h3>Recent Activities at {{ park.name }}</h3>
+                
+                {% if recent_activities %}
+                    {% for activity in recent_activities %}
+                        <div class="activity-item">
+                            <div class="activity-icon">
+                                <i class="fas {{ activity.activity_type.icon if activity.activity_type.icon else 'fa-running' }}"></i>
+                            </div>
+                            <div class="activity-details">
+                                <div class="user">{{ activity.user.first_name }} {{ activity.user.last_name }}</div>
+                                <div class="info">
+                                    {{ activity.activity_type.name }} for {{ activity.duration_minutes }} minutes on {{ activity.date.strftime('%B %d, %Y') }}
+                                </div>
+                            </div>
+                            <div class="activity-points">+{{ activity.points_earned }} pts</div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p>No activities have been logged at this park yet. Be the first!</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <p>&copy; 2025 IndyFit | SDEV 220 - Ivy Tech Community College</p>
+    </footer>
+</body>
+</html>

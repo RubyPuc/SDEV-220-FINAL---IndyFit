@@ -1,9 +1,10 @@
-from flask import Flask, render_template, flash, redirect, url_for, request
+from flask import Flask, render_template, flash, redirect, url_for, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 import os
-from models.user import db, bcrypt, User
+from datetime import datetime
 from functools import wraps
+from models import db, bcrypt, User, Park, ActivityType, UserActivity
 
 app = Flask(__name__, static_folder='static')
 
@@ -148,17 +149,19 @@ def login():
 @login_required
 def profile():
     """User profile route"""
-    # Mock data for activities
-    activities_count = 0
+    # Get real activity data
+    recent_activities = current_user.get_recent_activities(5)
+    activities_count = len(recent_activities)
     ranking = User.get_user_ranking(current_user.id)
-    recent_activities = []  # This would be populated from a database in a real implementation
+    activity_stats = current_user.get_activity_stats()
     
     return render_template('profile.html',
                           title='My Profile',
                           current_user=current_user,
                           activities_count=activities_count,
                           ranking=ranking,
-                          recent_activities=recent_activities)
+                          recent_activities=recent_activities,
+                          activity_stats=activity_stats)
 
 @app.route('/logout')
 @login_required
@@ -167,6 +170,89 @@ def logout():
     logout_user()
     flash('You have been logged out.', 'success')
     return redirect(url_for('home'))
+
+# Activity tracking routes
+@app.route('/activities', methods=['GET', 'POST'])
+@login_required
+def activities():
+    """Activity tracking route"""
+    # Get all activity types and parks for the form
+    activity_types = ActivityType.get_all_types()
+    parks = Park.get_all_parks()
+    
+    if request.method == 'POST':
+        activity_type_id = request.form.get('activity_type_id')
+        park_id = request.form.get('park_id')
+        duration_minutes = request.form.get('duration_minutes')
+        date_str = request.form.get('date')
+        notes = request.form.get('notes')
+        
+        # Validate form data
+        if not activity_type_id or not park_id or not duration_minutes:
+            flash('Please fill in all required fields.', 'danger')
+            return render_template('activities.html',
+                                  title='Log Activity',
+                                  activity_types=activity_types,
+                                  parks=parks)
+        
+        try:
+            # Parse date or use today
+            activity_date = datetime.strptime(date_str, '%Y-%m-%d').date() if date_str else datetime.utcnow().date()
+            
+            # Create activity
+            activity = UserActivity.create_activity(
+                user_id=current_user.id,
+                activity_type_id=int(activity_type_id),
+                park_id=int(park_id),
+                duration_minutes=int(duration_minutes),
+                notes=notes,
+                date=activity_date
+            )
+            
+            flash(f'Activity logged successfully! You earned {activity.points_earned} points.', 'success')
+            return redirect(url_for('profile'))
+        except Exception as e:
+            flash(f'Error logging activity: {str(e)}', 'danger')
+    
+    # GET request - show form
+    return render_template('activities.html',
+                          title='Log Activity',
+                          activity_types=activity_types,
+                          parks=parks,
+                          today=datetime.utcnow().date().strftime('%Y-%m-%d'))
+
+@app.route('/parks')
+def parks_list():
+    """Parks listing route"""
+    parks = Park.get_all_parks()
+    return render_template('parks.html',
+                          title='Indianapolis Parks',
+                          parks=parks)
+
+@app.route('/parks/<int:park_id>')
+def park_detail(park_id):
+    """Park detail route"""
+    park = Park.find_by_id(park_id)
+    if not park:
+        flash('Park not found.', 'danger')
+        return redirect(url_for('parks_list'))
+    
+    # Get recent activities at this park
+    recent_activities = UserActivity.get_park_activities(park_id)
+    
+    return render_template('park_detail.html',
+                          title=park.name,
+                          park=park,
+                          recent_activities=recent_activities)
+
+@app.route('/leaderboard')
+def leaderboard():
+    """Leaderboard route"""
+    top_users = User.get_leaderboard(20)
+    return render_template('leaderboard.html',
+                          title='Leaderboard',
+                          top_users=top_users,
+                          current_user=current_user if current_user.is_authenticated else None)
 
 # Admin routes
 @app.route('/admin/login', methods=['GET', 'POST'])
@@ -205,11 +291,11 @@ def admin_logout():
 @admin_required
 def admin_dashboard():
     """Admin dashboard route"""
-    # Mock statistics for the dashboard
+    # Real statistics for the dashboard
     stats = {
         'user_count': User.query.count(),
-        'activity_count': 0,  # Placeholder for future implementation
-        'park_count': 0,      # Placeholder for future implementation
+        'activity_count': UserActivity.query.count(),
+        'park_count': Park.query.count(),
         'total_points': User.query.with_entities(db.func.sum(User.points)).scalar() or 0
     }
     
@@ -217,7 +303,7 @@ def admin_dashboard():
                           title='Admin Dashboard',
                           current_user=current_user,
                           stats=stats,
-                          recent_activities=[])  # Placeholder for future implementation
+                          recent_activities=UserActivity.get_recent_activities(10))
 
 def init_db():
     """Initialize the database and create tables"""
@@ -226,6 +312,7 @@ def init_db():
             db.create_all()  # Create database tables
             print("Database tables created successfully")
             create_admin_if_not_exists()  # Create admin user if needed
+            create_default_data()  # Create default activity types and parks
         except Exception as e:
             print(f"Error initializing database: {str(e)}")
             # If there's an error, wait and retry (useful for container startup timing)
@@ -234,6 +321,64 @@ def init_db():
             print("Retrying database initialization...")
             db.create_all()
             create_admin_if_not_exists()
+            create_default_data()
+
+def create_default_data():
+    """Create default activity types and parks if they don't exist"""
+    # Create default activity types
+    if ActivityType.query.count() == 0:
+        print("Creating default activity types...")
+        default_activities = [
+            {"name": "Walking", "description": "A casual walk in the park", "points_per_minute": 1, "icon": "fa-walking"},
+            {"name": "Running", "description": "Jogging or running", "points_per_minute": 2, "icon": "fa-running"},
+            {"name": "Cycling", "description": "Biking on trails or paths", "points_per_minute": 2, "icon": "fa-bicycle"},
+            {"name": "Hiking", "description": "Hiking on nature trails", "points_per_minute": 3, "icon": "fa-hiking"},
+            {"name": "Swimming", "description": "Swimming in pools or lakes", "points_per_minute": 3, "icon": "fa-swimmer"},
+            {"name": "Yoga", "description": "Outdoor yoga sessions", "points_per_minute": 2, "icon": "fa-pray"},
+            {"name": "Basketball", "description": "Playing basketball", "points_per_minute": 3, "icon": "fa-basketball-ball"},
+            {"name": "Tennis", "description": "Playing tennis", "points_per_minute": 3, "icon": "fa-table-tennis"}
+        ]
+        
+        for activity in default_activities:
+            ActivityType.create_activity_type(**activity)
+        print(f"Created {len(default_activities)} default activity types")
+    
+    # Create default parks
+    if Park.query.count() == 0:
+        print("Creating default parks...")
+        default_parks = [
+            {
+                "name": "Eagle Creek Park",
+                "address": "7840 W 56th St, Indianapolis, IN 46254",
+                "description": "One of the largest municipal parks in the United States with over 3,900 acres of land and 1,400 acres of water.",
+                "facilities": "Hiking trails, Fishing, Boating, Swimming, Bird watching, Picnic areas",
+                "latitude": 39.8352,
+                "longitude": -86.3077,
+                "image_url": "https://example.com/eagle_creek.jpg"
+            },
+            {
+                "name": "Garfield Park",
+                "address": "2345 Pagoda Dr, Indianapolis, IN 46203",
+                "description": "Oldest city park in Indianapolis featuring a conservatory and sunken gardens.",
+                "facilities": "Conservatory, Sunken gardens, Arts center, Aquatic center, Picnic areas",
+                "latitude": 39.7329,
+                "longitude": -86.1443,
+                "image_url": "https://example.com/garfield_park.jpg"
+            },
+            {
+                "name": "Holliday Park",
+                "address": "6363 Spring Mill Rd, Indianapolis, IN 46260",
+                "description": "94-acre park featuring The Ruins, nature center, and hiking trails.",
+                "facilities": "Playground, Nature center, Hiking trails, Picnic areas",
+                "latitude": 39.8719,
+                "longitude": -86.1694,
+                "image_url": "https://example.com/holliday_park.jpg"
+            }
+        ]
+        
+        for park in default_parks:
+            Park.create_park(**park)
+        print(f"Created {len(default_parks)} default parks")
 
 if __name__ == '__main__':
     # Initialize database with retry logic for container startup

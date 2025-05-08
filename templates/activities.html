@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        .activity-form {
+            max-width: 600px;
+            margin: 30px auto;
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        .form-group select,
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        
+        .form-group textarea {
+            height: 100px;
+            resize: vertical;
+        }
+        
+        .form-group input[type="submit"] {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            cursor: pointer;
+            padding: 12px;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        
+        .form-group input[type="submit"]:hover {
+            background-color: #236c77;
+        }
+        
+        .activity-type-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .activity-type-option {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .activity-type-option:hover {
+            border-color: var(--primary-color);
+            background-color: #f0f9fa;
+        }
+        
+        .activity-type-option.selected {
+            border-color: var(--primary-color);
+            background-color: #e0f4f6;
+        }
+        
+        .activity-type-option i {
+            font-size: 24px;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+        
+        .activity-type-option p {
+            margin: 0;
+            font-weight: bold;
+        }
+        
+        .points-preview {
+            background-color: #f0f9fa;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .points-preview h3 {
+            margin-top: 0;
+            color: var(--primary-color);
+        }
+        
+        .points-preview .points {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>IndyFit</h1>
+        <p>Fitness for Indianapolis Parks</p>
+    </header>
+    
+    <nav>
+        <a href="/">Home</a>
+        <a href="/parks">Parks</a>
+        <a href="/activities" class="active">Log Activity</a>
+        <a href="/leaderboard">Leaderboard</a>
+        <a href="/profile" style="margin-left: auto;">My Profile</a>
+        <a href="/logout">Logout</a>
+    </nav>
+    
+    <div class="container">
+        <div class="activity-form">
+            <h2>Log Your Activity</h2>
+            
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            
+            <form method="POST" action="{{ url_for('activities') }}" id="activity-form">
+                <div class="form-group">
+                    <label for="activity_type_id">Activity Type</label>
+                    <select id="activity_type_id" name="activity_type_id" required>
+                        <option value="">Select an activity type</option>
+                        {% for activity_type in activity_types %}
+                            <option value="{{ activity_type.id }}" data-points="{{ activity_type.points_per_minute }}">{{ activity_type.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="park_id">Park Location</label>
+                    <select id="park_id" name="park_id" required>
+                        <option value="">Select a park</option>
+                        {% for park in parks %}
+                            <option value="{{ park.id }}">{{ park.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="duration_minutes">Duration (minutes)</label>
+                    <input type="number" id="duration_minutes" name="duration_minutes" min="1" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="date">Date</label>
+                    <input type="date" id="date" name="date" value="{{ today }}" max="{{ today }}">
+                </div>
+                
+                <div class="form-group">
+                    <label for="notes">Notes (optional)</label>
+                    <textarea id="notes" name="notes"></textarea>
+                </div>
+                
+                <div class="points-preview">
+                    <h3>Points Preview</h3>
+                    <p>You will earn <span class="points" id="points-preview">0</span> points for this activity.</p>
+                </div>
+                
+                <div class="form-group">
+                    <input type="submit" value="Log Activity">
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <footer>
+        <p>&copy; 2025 IndyFit | SDEV 220 - Ivy Tech Community College</p>
+    </footer>
+    
+    <script>
+        // Calculate points preview
+        const activityTypeSelect = document.getElementById('activity_type_id');
+        const durationInput = document.getElementById('duration_minutes');
+        const pointsPreview = document.getElementById('points-preview');
+        
+        function updatePointsPreview() {
+            const selectedOption = activityTypeSelect.options[activityTypeSelect.selectedIndex];
+            const pointsPerMinute = selectedOption.dataset.points || 0;
+            const duration = durationInput.value || 0;
+            
+            const totalPoints = pointsPerMinute * duration;
+            pointsPreview.textContent = totalPoints;
+        }
+        
+        activityTypeSelect.addEventListener('change', updatePointsPreview);
+        durationInput.addEventListener('input', updatePointsPreview);
+    </script>
+</body>
+</html>
