@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.5.1 - Navigation Fix (2025-05-09)
+
+### Fixed
+- Fixed navigation layout issue where links were stacked vertically in desktop view
+- Added proper horizontal layout for desktop navigation
+- Improved responsive behavior for navigation menu
+- Fixed margin-left auto functionality for right-aligned navigation items
+
 ## v0.5.0 - UI/UX Enhancement with Responsive Design (2025-05-08)
 
 ### Added

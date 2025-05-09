@@ -126,6 +126,15 @@ nav {
   position: relative;
 }
 
+/* Add proper styling for nav-links in desktop view */
+.nav-links {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  width: 100%;
+  justify-content: flex-start;
+}
+
 nav a {
   color: var(--primary-color);
   text-decoration: none;
@@ -137,6 +146,11 @@ nav a {
 nav a:hover, nav a.active {
   background-color: var(--primary-light);
   color: var(--primary-dark);
+}
+
+/* Fix margin-left: auto to work properly */
+.ml-auto {
+  margin-left: auto !important;
 }
 
 .nav-toggle {
@@ -386,13 +400,14 @@ footer a {
     align-items: flex-start;
   }
   
-  nav .nav-links {
+  .nav-links {
     display: none;
     width: 100%;
     flex-direction: column;
+    align-items: flex-start;
   }
   
-  nav .nav-links.show {
+  .nav-links.show {
     display: flex;
   }
   
@@ -402,7 +417,7 @@ footer a {
     border-top: 1px solid rgba(0,0,0,0.1);
   }
   
-  nav a[style*="margin-left: auto"] {
+  .ml-auto {
     margin-left: 0 !important;
   }
 }
