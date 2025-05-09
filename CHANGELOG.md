@@ -1,5 +1,40 @@
 # Changelog
 
+## v0.5.0 - UI/UX Enhancement with Responsive Design (2025-05-08)
+
+### Added
+- Responsive design for all screen sizes
+  - Mobile-friendly navigation with hamburger menu
+  - Flexible layouts that adapt to different devices
+  - Media queries for various breakpoints
+- Enhanced visual design
+  - Improved color scheme with additional variables
+  - Modern card designs with hover effects
+  - Icons for better visual communication
+  - Consistent spacing and typography
+- Accessibility improvements
+  - Semantic HTML structure
+  - ARIA attributes for screen readers
+  - Improved focus states for keyboard navigation
+- Animation and interaction effects
+  - Smooth transitions between states
+  - Hover effects for interactive elements
+  - Loading states for better user feedback
+
+### Changed
+- Completely redesigned main stylesheet
+  - Added utility classes for common styling needs
+  - Implemented a more organized CSS structure
+  - Added responsive breakpoints
+- Updated templates to use new CSS features
+  - Restructured HTML for better semantics
+  - Added responsive navigation to all pages
+  - Improved form layouts and interactions
+- Enhanced user profile page
+  - Better visualization of user statistics
+  - Improved activity history display
+  - More intuitive layout on mobile devices
+
 ## v0.4.0 - Activity Tracking Implementation (2025-05-07)
 
 ### Added
